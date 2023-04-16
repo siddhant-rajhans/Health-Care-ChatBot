@@ -1,0 +1,14 @@
+from tkinter import *
+from PIL import Image, ImageTk
+#
+
+main_root = Tk()
+main_root.geometry("900x920")
+
+image_variable = Image.open("onlypng.png")
+photo_variable = ImageTk.PhotoImage(image_variable)
+photo_label = Label(image=photo_variable)
+photo_label.pack()
+
+
+main_root.mainloop()

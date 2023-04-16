@@ -1,0 +1,16 @@
+from tkinter import *
+# created a instance from TK class 
+main_root = Tk()
+
+main_root.geometry("900x920")
+
+# To show an image
+    # 1>image create a variable to store image
+photo_variable = PhotoImage(file="onlypng.png")
+    # 2>create a label to use variable
+photo_label = Label(image=photo_variable)
+    # 3>To show/print photo use pack & pack the label which contain photo variable
+photo_label.pack()
+
+
+main_root.mainloop()

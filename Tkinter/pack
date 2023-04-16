@@ -1,0 +1,21 @@
+from tkinter import *
+
+root = Tk()
+
+root.geometry("500x720")
+variable_for_label = Label(text="Info to show or mention using label", bg="black", fg="grey",
+                           padx=7, pady=2,font="comicsansms 20 bold",
+                           borderwidth=5,relief=RIDGE
+                           )
+
+#To use pack there is anchor points
+#Anchor:
+    # anchor = NW [Exception is bottom]
+    # to print in bottom side must be declared in bottom
+#Side: top, bootom, left ,right
+#Fill: fill= X, Y [Does not work with {side = BOTTOM}]
+variable_for_label.pack(side=BOTTOM, fill=X)
+
+
+root.mainloop()
+
