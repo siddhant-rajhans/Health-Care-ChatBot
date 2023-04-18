@@ -4,10 +4,13 @@ from tkinter import *
 from tkinter import messagebox                           
 import os            
 import webbrowser
+
 import numpy as np
 import pandas as pd
+   
 
 class HyperlinkManager:
+      
     def __init__(self, text):
         self.text = text
         self.text.tag_config("hyper", foreground="blue", underline=1)
@@ -64,13 +67,25 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.25, rand
 # classifier = DecisionTreeClassifier()
 # classifier.fit(X_train, y_train)
 
+# # Saving the information of columns
+# cols     = training_dataset.columns
+# cols     = cols[:-1]
+
+# # Checking the Important features
+# importances = classifier.feature_importances_
+# indices = np.argsort(importances)[::-1]
+# features = cols
+
+# # Implementing the Visual Tree
+# from sklearn.tree import _tree
+# Implementing the Random Forest Classifier
 from sklearn.ensemble import RandomForestClassifier
-classifier = RandomForestClassifier(n_estimators=100)
+classifier = RandomForestClassifier(n_estimators=100, max_depth=10, random_state=42)
 classifier.fit(X_train, y_train)
 
 # Saving the information of columns
-cols     = training_dataset.columns
-cols     = cols[:-1]
+cols = training_dataset.columns
+cols = cols[:-1]
 
 # Checking the Important features
 importances = classifier.feature_importances_
@@ -80,7 +95,8 @@ features = cols
 # Implementing the Visual Tree
 from sklearn.tree import _tree
 
-# # Method to simulate the working of a Chatbot by extracting and formulating questions
+
+# Method to simulate the working of a Chatbot by extracting and formulating questions
 def print_disease(node):
         #print(node)
         node = node[0]
@@ -115,7 +131,7 @@ def recurse(node, depth):
 #                print( "You may have " +  present_disease )
 #                print()
                 strData="You may have :" +  str(present_disease)
-                
+               
                 QuestionDigonosis.objRef.txtDigonosis.insert(END,str(strData)+'\n')                  
                 
                 red_cols = dimensionality_reduction.columns 
@@ -152,17 +168,38 @@ def recurse(node, depth):
                 #QuestionDigonosis.objRef.txtDigonosis.insert(END,str(strData)+'\n')                  
                 yield strData
         
-def tree_to_code(tree, feature_names):
-        global tree_,feature_name,symptoms_present
-        tree_ = tree.tree_
-        #print(tree_)
-        feature_name = [
-            feature_names[i] if i != _tree.TREE_UNDEFINED else "undefined!"
-            for i in tree_.feature
-        ]
-        #print("def tree({}):".format(", ".join(feature_names)))
-        symptoms_present = []   
-#        recurse(0, 1)
+# def tree_to_code(tree, feature_names):
+#         global tree_,feature_name,symptoms_present
+#         tree_ = tree.tree_
+#         #print(tree_)
+#         feature_name = [
+#             feature_names[i] if i != _tree.TREE_UNDEFINED else "undefined!"
+#             for i in tree_.feature
+#         ]
+#         #print("def tree({}):".format(", ".join(feature_names)))
+#         symptoms_present = []   
+# #        recurse(0, 1)
+
+from sklearn.tree import export_graphviz
+import subprocess
+
+def tree_to_code(model, feature_names):
+    # Extract all the individual decision trees from the Random Forest model
+    estimators = model.estimators_
+
+    # Loop over each tree and convert it to code
+    for i, tree in enumerate(estimators):
+        with open(f"tree_{i}.dot", 'w') as f:
+            export_graphviz(tree, out_file=f,
+                            feature_names=feature_names,
+                            filled=True)
+
+        # Convert the .dot file to a .png file
+        command = ["dot", "-Tpng", f"tree_{i}.dot", "-o", f"tree_{i}.png"]
+        subprocess.check_call(command)
+
+    print(f"Exported {len(estimators)} trees to code and PNG files.")
+
     
 
 def execute_bot():
@@ -191,130 +228,14 @@ doctors['name'] = doc_dataset['Name']
 doctors['link'] = doc_dataset['Description']
 
 record = doctors[doctors['disease'] == 'AIDS']
-record['name']  
+record['name']
 record['link']
 
 
 
 
 # Execute the bot and see it in Action
-# execute_bot()  
-
-
-
-# # Implementing the Visual Tree
-# from sklearn.tree import _tree
-
-# # Method to simulate the working of a Chatbot by extracting and formulating questions
-# def print_disease(node):
-#         #print(node)
-#         node = node[0]
-#         #print(len(node))
-#         val  = node.nonzero() 
-#         #print(val)
-#         disease = labelencoder.inverse_transform(val[0])
-#         return disease
-# def recurse(node, depth):
-#             global val,ans
-#             global forest_,feature_name,symptoms_pres
-#             indent = "  " * depth
-#             if forest_.tree_.feature[node] != _tree.TREE_UNDEFINED:
-#                 name = feature_name[node]
-#                 threshold = forest_.tree_.threshold[node]
-#                 yield name + " ?"
-                
-# #                ans = input()
-#                 ans = ans.lower()
-#                 if ans == 'yes':
-#                     val = 1
-#                 else:
-#                     val = 0
-#                 if  val <= threshold:
-#                     yield from recurse(forest_.tree_.children_left[node], depth + 1)
-#                 else:
-#                     symptoms_present.append(name)
-#                     yield from recurse(forest_.tree_.children_right[node], depth + 1)
-#             else:
-#                 strData=""
-#                 present_disease = print_disease(forest_.tree_.value[node])
-# #                print( "You may have " +  present_disease )
-# #                print()
-#                 strData="You may have :" +  str(present_disease)
-                
-#                 QuestionDigonosis.objRef.txtDigonosis.insert(END,str(strData)+'\n')                  
-                
-#                 red_cols = dimensionality_reduction.columns 
-#                 symptoms_given = red_cols[dimensionality_reduction.loc[present_disease].values[0].nonzero()]
-# #                print("symptoms present  " + str(list(symptoms_present)))
-# #                print()
-#                 strData="symptoms present:  " + str(list(symptoms_present))
-#                 QuestionDigonosis.objRef.txtDigonosis.insert(END,str(strData)+'\n')                  
-# #                print("symptoms given "  +  str(list(symptoms_given)) )  
-# #                print()
-#                 strData="symptoms given: "  +  str(list(symptoms_given))
-#                 QuestionDigonosis.objRef.txtDigonosis.insert(END,str(strData)+'\n')                  
-#                 confidence_level = (1.0*len(symptoms_present))/len(symptoms_given)
-# #                print("confidence level is " + str(confidence_level))
-# #                print()
-#                 strData="confidence level is: " + str(confidence_level)
-#                 QuestionDigonosis.objRef.txtDigonosis.insert(END,str(strData)+'\n')                  
-# #                print('The model suggests:')
-# #                print()
-#                 strData='The model suggests:'
-#                 QuestionDigonosis.objRef.txtDigonosis.insert(END,str(strData)+'\n')                  
-#                 row = doctors[doctors['disease'] == present_disease[0]]
-# #                print('Consult ', str(row['name'].values))
-# #                print()
-#                 strData='Consult '+ str(row['name'].values)
-#                 QuestionDigonosis.objRef.txtDigonosis.insert(END,str(strData)+'\n')                  
-# #                print('Visit ', str(row['link'].values))
-#                 #print(present_disease[0])
-#                 hyperlink = HyperlinkManager(QuestionDigonosis.objRef.txtDigonosis)
-#                 strData='Visit '+ str(row['link'].values[0])
-#                 def click1():
-#                     webbrowser.open_new(str(row['link'].values[0]))
-#                 QuestionDigonosis.objRef.txtDigonosis.insert(INSERT, strData, hyperlink.add(click1))
-                
-# def execute_bot():
-#             # print("Please reply with yes/Yes or no/No for the following symptoms")
-#             symptoms_present.clear()
-#             cols=list(dimensionality_reduction.columns)
-#             # removing the disease columns from the symptoms list
-#             cols.remove('prognosis')
-#             x=np.zeros([1,len(cols)])
-#             for i in range(0,len(cols)):
-#                 for symptom in symptoms:
-#                     if(symptom==cols[i]):
-#                         x[0][i]=1
-#             # print(len(x))
-#             # print(cols)
-#             pred=rfc.predict(x)
-#             # print(pred)
-#             for value in pred:
-#                 predDisease=value
-#             # print(predDisease)
-#             if predDisease:
-#                 node_indicator = rfc.decision_path(x)
-#                 leaf_id = rfc.apply(x)
-#                 # print(leaf_id)
-#                 node_index = node_indicator.indices[node_indicator.indptr[leaf_id]:
-#                                                     node_indicator.indptr[leaf_id + 1]]
-#                 # print(node_indicator)
-#                 # print(node_index)
-#                 features=[]
-#                 for i in range(0,len(cols)):
-#                     for index in node_index:
-#                         if i == rfc.tree_.feature[index]:
-#                             # print(i)
-#                             # print(cols[i])
-#                             features.append(cols[i])
-#                 recurse(0,1,features)
-#             else:
-#                 strData="No Disease found"
-#                 QuestionDigonosis.objRef.txtDigonosis.insert(END,str(strData)+'\n')                  
-#                 return
-
-
+#execute_bot()
 
     
 class QuestionDigonosis(Frame):
@@ -398,11 +319,10 @@ class MainForm(Frame):
         ######  Main layout call   ######
         self.createWidget()
 
-
-
     def layout_new(self):
         pass
 
+    
     def createWidget(self):
         self.lblMsg=Label(self, text="Health Care Chatbot", bg="PeachPuff2", width="300", height="4", font=("Calibri", 15   ))
         self.lblMsg.pack()
@@ -422,13 +342,6 @@ class MainForm(Frame):
 
         self.lblTeam1=Label(self, text="Swami Rama Himalayan university ", bg="RoyalBlue1", width = "550", height = "3", font=("Calibri", 17))
         self.lblTeam1.pack()
-        # self.lblTeam2=Label(self, text="Saroj Chauhan", bg="RoyalBlue2", width = "250", height = "1", font=("Calibri", 13))
-        # self.lblTeam2.pack()
-        # self.lblTeam3=Label(self, text="Priya Kothiyal", bg="RoyalBlue3", width = "250", height = "1", font=("Calibri", 13))
-        # self.lblTeam3.pack()
-        # self.lblTeam3=Label(self, text="Geetesh Sharma", bg="RoyalBlue3", width = "250", height = "1", font=("Calibri", 13))
-        # self.lblTeam3.pack()
-        
         
     def lblLogin_Click(self):
         self.destroyPackWidget(MainForm.main_Root)
@@ -440,11 +353,7 @@ class MainForm(Frame):
         frmSignUp.pack()
 
 
-# class logo(Frame):
-#     main_Root=None
-#     var_photo = PhotoImage(file="new logo.png")
-#     var_photo_label = Label(image= var_photo, width="250" , height= "250")
-#     var_photo_label.pack()
+
         
 class Login(Frame):
     main_Root=None
